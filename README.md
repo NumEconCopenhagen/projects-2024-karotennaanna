@@ -1,9 +1,9 @@
 # \[Group name\]
 
 **Group members:**
-- A
-- B
-- C
+- Karoline Meulengracht
+- Tenna Merrald
+- Anna Stenild
 
 This repository contains  
 1. Inaugural project. 
