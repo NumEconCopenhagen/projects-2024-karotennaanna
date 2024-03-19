@@ -1,5 +1,5 @@
 # Inaugural project
 
-The **results** of the project can be seen from running [inauguralproject.ipynb](inauguralproject.ipynb).
+The project shows different allocations of an exchange economy with two agents and two goods. 
 
-**Dependencies:** Apart from a standard Anaconda Python 3 installation, the project requires no further packages.
+The **results** of the project can be seen from running [anna_inauguralproject.ipynb](anna_inauguralproject.ipynb).
