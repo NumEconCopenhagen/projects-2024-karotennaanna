@@ -81,4 +81,5 @@ class ExchangeEconomyClass:
         eps2 = x2A - self.par.w2A + x2B - (1 - self.par.w2A)
 
         return eps1+eps2
-        
+    
+   
