@@ -19,7 +19,7 @@ from types import SimpleNamespace
 import numpy as np
 import pandas as pd
 
-class ASADClass:
+class Solowclass:
 
     def __init__(self,filename):
 
@@ -29,7 +29,7 @@ class ASADClass:
         moms = self.moms = SimpleNamespace() # moments in the model
         
         # Reading the Excel file into a DataFrame and displaying the first 5 rows
-        self.data = pd.read_excel(filename, header=0)
+        self.data = pd.read_csv(filename, delimiter=";")
 
         # a. externally given parameters
         par.alpha = None
