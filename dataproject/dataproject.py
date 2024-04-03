@@ -16,21 +16,23 @@ def keep_regs(df, regs):
     return df
 
 from types import SimpleNamespace
-
 import numpy as np
+import pandas as pd
 
 class ASADClass:
 
-    def __init__(self):
+    def __init__(self,filename):
 
         par = self.par = SimpleNamespace() # parameters
         sim = self.sim = SimpleNamespace() # simulation variables
         datamoms = self.datamoms = SimpleNamespace() # moments in the data
         moms = self.moms = SimpleNamespace() # moments in the model
+        
+        # Reading the Excel file into a DataFrame and displaying the first 5 rows
+        self.data = pd.read_excel(filename, header=0)
 
         # a. externally given parameters
         par.alpha = None
-
-    def GDP(self):
-
-    return error 
+    
+    def print_head(self):
+        print(self.data.head(5))
