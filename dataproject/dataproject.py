@@ -53,3 +53,4 @@ class AlphaCalculator:
         
         alpha_value = (ln_Q_t - ln_KL_t) / (ln_B_t - ln_KL_t)
         return alpha_value
+
