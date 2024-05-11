@@ -1,25 +1,33 @@
+from types import SimpleNamespace
+
 class ISLMclass:
-    def __init__(self, a, b, c, d, e, f, g, T, G, M, P):
-        self.a = a
-        self.b = b
-        self.c = c
-        self.d = d
-        self.e = e
-        self.f = f
-        self.g = g
-        self.T = T
-        self.G = G
-        self.M = M
-        self.P = P
+    def __init__(self, a, b, c, d, e, f, g, T, G, M, P, r, N):
+        self.par = SimpleNamespace(a=a, b=b, c=c, d=d, e=e, f=f, g=g, T=T, G=G, M=M, P=P, r=r, N=N)
 
-    def IS_curve(self, Y, r):
-        return (1 / self.d) * (self.a + self.c - self.b * self.T + self.G - (1 - self.b) * Y) - Y
+    def planned_expenditures(self, Y):
+        # Calculate planned expenditures directly using Y
+        return self.private_consumption(Y) + self.investment_demand() + self.par.G
 
-    def LM_curve(self, Y, r):
-        return (self.e / self.f) * Y - (1 / self.f) * (self.M / self.P) - r
+    def private_consumption(self, Y):
+        # Calculate private consumption using Y
+        return self.par.a + self.par.b * (Y - self.par.T)
 
-    def system_equations(self, vars):
-        Y, r = vars
-        return [self.IS_curve(Y, r), self.LM_curve(Y, r)]
+    def investment_demand(self):
+        # Calculate investment demand using the class interest rate
+        return self.par.c - self.par.d * self.par.r
 
+    def real_demand_for_money(self, Y):
+        # Calculate real demand for money using Y
+        return self.par.e * Y - self.par.f * self.par.r
 
+    def equilibrium_in_money_market(self, Y):
+        # Equation for money market equilibrium
+        return self.par.M / self.par.P - self.real_demand_for_money(Y)
+
+    def IS_curve(self, Y):
+        # IS curve defined explicitly with Y
+        return (1 / self.par.d) * (self.par.a + self.par.c - self.par.b * self.par.T + self.par.G - (1 - self.par.b) * Y) - Y
+
+    def LM_curve(self, Y):
+        # LM curve defined explicitly with Y
+        return (self.par.e / self.par.f) * Y - (1 / self.par.f) * (self.par.M / self.par.P)
