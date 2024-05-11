@@ -1,4 +1,3 @@
-
 from types import SimpleNamespace
 import numpy as np
 
@@ -52,9 +51,3 @@ class ISLMclass:
     def IS_curve(self):
         par = self.par
         return (1 / self.d) * (self.a + self.c - self.b * self.T + self.G - (1 - self.b) * self.Y())
-    
-    def LM_curve(self):
-        par = self.par
-        return (self.e / self.f) * Y - ((1/self.f)(self.M/self.P))
-    
-
