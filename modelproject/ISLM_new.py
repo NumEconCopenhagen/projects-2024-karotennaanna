@@ -1,9 +1,13 @@
 import sympy as sp
 
 class ISLM_alg:
-    def __init__(self):
+    def __init__(self, a, b, c, d, e, f, T, G, M, P):
+        # Assign parameters to instance variables
+        self.a, self.b, self.c, self.d, self.e, self.f, self.T, self.G, self.M, self.P = a, b, c, d, e, f, T, G, M, P
+        
         # Define symbols
-        self.Y, self.r, self.a, self.b, self.c, self.d, self.e, self.f, self.T, self.G, self.M, self.P, self.PE, self.C, self.I, self.L = sp.symbols('Y r a b c d e f T G M P PE C I L')
+        self.Y, self.r = sp.symbols('Y r')
+        self.C, self.I, self.PE, self.L = sp.symbols('C I PE L')
         
         # Define equations
         self.PlannedExp = sp.Eq(self.PE, self.C + self.I + self.G)
@@ -55,3 +59,20 @@ class ISLM_alg:
         equilibrium = sp.solve([IS_eq, LM_eq], (self.Y, self.r), dict=True)
         
         return equilibrium
+    
+    def objective(self, params):
+        T, G, M = params
+        self.T, self.G, self.M = T, G, M
+        
+        equilibrium = self.find_equilibrium()
+        if equilibrium:
+            for sol in equilibrium:
+                if self.r in sol:
+                    return (sol[self.r] - 0.04)**2
+        return float('inf')
+
+    def optimize_parameters(self):
+        initial_guess = [self.T, self.G, self.M]
+        result = minimize(self.objective, initial_guess, method='Nelder-Mead')
+        self.T, self.G, self.M = result.x
+        return result.x
