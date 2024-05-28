@@ -1,4 +1,5 @@
 import sympy as sp
+from scipy.optimize import minimize
 
 class ISLM_alg:
     def __init__(self, a, b, c, d, e, f, T, G, M, P):
@@ -61,8 +62,7 @@ class ISLM_alg:
         return equilibrium
     
     def objective(self, params):
-        T, G, M = params
-        self.T, self.G, self.M = T, G, M
+        self.T = params[0]
         
         equilibrium = self.find_equilibrium()
         if equilibrium:
@@ -72,7 +72,7 @@ class ISLM_alg:
         return float('inf')
 
     def optimize_parameters(self):
-        initial_guess = [self.T, self.G, self.M]
+        initial_guess = [self.T]
         result = minimize(self.objective, initial_guess, method='Nelder-Mead')
-        self.T, self.G, self.M = result.x
+        self.T = result.x[0]
         return result.x
