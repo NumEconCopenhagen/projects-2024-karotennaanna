@@ -25,16 +25,33 @@ class ISLM_alg:
         # Substitute I from Investment into EqGoods_subsub:
         EqGoods_final = EqGoods_subsub.subs(self.I, self.c - self.d * self.r)
         
-        # Solve the system of equations for Y and r separately
-        solution_Y = sp.solve(EqGoods_final, self.Y)
-        solution_r = sp.solve(EqGoods_final, self.r)
-        return solution_Y, solution_r
+        return EqGoods_final
 
     def derive_LM(self):
         # Substitute EqMoney into dMoney
         dMoney_substituted = self.dMoney.subs(self.L, self.M / self.P)
         
-        # Solve the LM equation for Y and r separately
-        solution_Y = sp.solve(dMoney_substituted, self.Y)
-        solution_r = sp.solve(dMoney_substituted, self.r)
-        return solution_Y, solution_r
+        return dMoney_substituted
+    
+    def solve_for_Y(self):
+        IS_eq = self.derive_IS()
+        LM_eq = self.derive_LM()
+        IS_solution_Y = sp.solve(IS_eq, self.Y)
+        LM_solution_Y = sp.solve(LM_eq, self.Y)
+        return IS_solution_Y, LM_solution_Y
+
+    def solve_for_r(self):
+        IS_eq = self.derive_IS()
+        LM_eq = self.derive_LM()
+        IS_solution_r = sp.solve(IS_eq, self.r)
+        LM_solution_r = sp.solve(LM_eq, self.r)
+        return IS_solution_r, LM_solution_r
+
+    def find_equilibrium(self):
+        IS_eq = self.derive_IS()
+        LM_eq = self.derive_LM()
+        
+        # Solve the IS and LM equations together for Y and r
+        equilibrium = sp.solve([IS_eq, LM_eq], (self.Y, self.r), dict=True)
+        
+        return equilibrium
