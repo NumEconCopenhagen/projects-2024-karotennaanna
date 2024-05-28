@@ -83,8 +83,15 @@ class ISLM_alg:
 class ISLMPlotter:
     def __init__(self, model):
         self.model = model
+        self.initial_IS_r_values = None
+        self.initial_LM_r_values = None
 
-    def plot(self, Y_range=(0, 3), num_points=100):
+    def store_initial_curves(self, Y_range=(0, 3), num_points=100):
+        Y_values = np.linspace(Y_range[0], Y_range[1], num_points)
+        self.initial_IS_r_values = [sp.solve(self.model.derive_IS().subs(self.model.Y, Y_val), self.model.r)[0].evalf() for Y_val in Y_values]
+        self.initial_LM_r_values = [sp.solve(self.model.derive_LM().subs(self.model.Y, Y_val), self.model.r)[0].evalf() for Y_val in Y_values]
+
+    def plot(self, Y_range=(0, 3), num_points=100, label_suffix='', include_initial_curves=False):
         new_equilibrium = self.model.find_equilibrium()
 
         # Initialize new_Y and new_r
@@ -109,11 +116,14 @@ class ISLMPlotter:
 
             # Plot the curves
             plt.figure(figsize=(10, 6))
-            plt.plot(Y_values, IS_r_values, label='IS Curve', color='blue')
-            plt.plot(Y_values, LM_r_values, label='LM Curve', color='red')
+            if include_initial_curves and self.initial_IS_r_values and self.initial_LM_r_values:
+                plt.plot(Y_values, self.initial_IS_r_values, label='Initial IS Curve', color='blue', linestyle='--')
+                plt.plot(Y_values, self.initial_LM_r_values, label='Initial LM Curve', color='red', linestyle='--')
+            plt.plot(Y_values, IS_r_values, label=f'IS Curve {label_suffix}', color='blue')
+            plt.plot(Y_values, LM_r_values, label=f'LM Curve {label_suffix}', color='red')
 
             # Mark the new equilibrium point
-            plt.scatter(new_Y, new_r, color='green', s=100, label=f'New Equilibrium (Y={new_Y:.2f}, r={new_r:.2f})')
+            plt.scatter(new_Y, new_r, color='green', s=100, label=f'New Equilibrium {label_suffix} (Y={new_Y:.2f}, r={new_r:.2f})')
 
             # Add labels and legend
             plt.xlabel('Output, Y')
@@ -126,3 +136,17 @@ class ISLMPlotter:
             plt.show()
         else:
             print("New equilibrium values for Y and r are not defined.")
+
+    def compare_G_changes(self, initial_G, new_G, Y_range=(0, 3), num_points=100):
+        self.model.G = initial_G
+        self.store_initial_curves(Y_range, num_points)
+
+        self.model.G = new_G
+        self.plot(Y_range, num_points, label_suffix=f'G={new_G}', include_initial_curves=True)
+
+    def compare_M_changes(self, initial_M, new_M, Y_range=(0, 3), num_points=100):
+        self.model.M = initial_M
+        self.store_initial_curves(Y_range, num_points)
+
+        self.model.M = new_M
+        self.plot(Y_range, num_points, label_suffix=f'M={new_M}', include_initial_curves=True)
