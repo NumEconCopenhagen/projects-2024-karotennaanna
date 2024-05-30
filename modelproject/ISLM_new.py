@@ -114,7 +114,7 @@ class ISLM_alg:
         # Add labels and legend
         plt.xlabel('Output (GDP)')
         plt.ylabel('Interest Rate, r')
-        plt.title('IS-LM Model')
+        plt.title('Baseline IS-LM Model')
         plt.legend()
         plt.grid(True)
         plt.xlim(x_range)  # Set x-axis limits
@@ -124,7 +124,7 @@ class ISLM_alg:
         plt.show()
 
     def compare_G_changes(self, initial_G, new_G, x_range=(0.5, 2.5), num_points=100, y_range=(-2, 2)):
-        print(f"Comparing IS curves for G={initial_G} and G={new_G}...")
+        print(f"IS-LM Model with fiscal shock (increase in G)")
         self.G = initial_G
         initial_IS_r_values, initial_LM_r_values = self.store_curves(x_range, num_points)
         initial_equilibrium = self.find_equilibrium()
@@ -155,7 +155,7 @@ class ISLM_alg:
         # Add labels and legend
         plt.xlabel('Output (GDP)')
         plt.ylabel('Interest Rate, r')
-        plt.title('IS-LM Model Comparison for Different G Values')
+        plt.title('IS-LM Model with fiscal shock (increase in G)')
         plt.legend()
         plt.grid(True)
         plt.xlim(x_range)  # Set x-axis limits
@@ -165,7 +165,7 @@ class ISLM_alg:
         plt.show()
 
     def compare_M_changes(self, initial_M, new_M, x_range=(0.5, 2.5), num_points=100, y_range=(-2, 2)):
-        print(f"Comparing IS-LM models for M={initial_M} and M={new_M} with G=1...")
+        print(f"IS-LM Model with fiscal shock (increase in M)")
         
         # Store initial conditions with G=1
         self.G = 1
@@ -201,7 +201,7 @@ class ISLM_alg:
         # Add labels and legend
         plt.xlabel('Output (GDP)')
         plt.ylabel('Interest Rate, r')
-        plt.title('IS-LM Model Comparison for Different M Values')
+        plt.title('IS-LM Model with fiscal shock (increase in M)')
         plt.legend()
         plt.grid(True)
         plt.xlim(x_range)  # Set x-axis limits
