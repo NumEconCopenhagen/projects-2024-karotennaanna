@@ -12,6 +12,7 @@ class ISLM_alg:
         # Assign parameters to instance variables
         self.a, self.b, self.c, self.d, self.e, self.f, self.T, self.G, self.M, self.P = a, b, c, d, e, f, T, G, M, P
         
+        
         # Define symbols
         self.Y, self.r = sp.symbols('Y r')
         self.C, self.I, self.PE, self.L = sp.symbols('C I PE L')
@@ -209,4 +210,106 @@ class ISLM_alg:
         # Show the plot
         plt.show()
 
+    def initialize_parameters(self, a, b, c, d, f, g, epsilon, e, M, P, L, T, Y, r, PE, C, I, G, NX):
+        self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.f = f
+        self.g = g
+        self.epsilon = epsilon
+        self.e = e
+        self.M = M
+        self.P = P
+        self.L = L
+        self.T = T
+        self.Y = Y
+        self.r = r
+        self.PE = PE
+        self.C = C
+        self.I = I
+        self.G = G
+        self.NX = NX
 
+# Define equations for open economy
+        self.PlannedExp_open = sp.Eq(self.PE, self.C + self.I + self.G + self.NX)
+        self.PrivateCons_open = sp.Eq(self.C, self.a + self.b * (self.Y - self.T))
+        self.Netexport = sp.Eq(self.NX, self.f - self.g * self.epsilon)
+        
+        # Define the money market equations
+        self.EqMoney = sp.Eq(self.M / self.P, self.L)
+        self.dMoney = sp.Eq(self.L, self.e * self.Y - self.f * self.r)
+
+    def derive_IS_open(self):
+        # Substitute PE from PlannedExp_open into EqGoods
+        EqGoods_open = sp.Eq(self.Y, self.PE)
+        EqGoods_open_sub = EqGoods_open.subs(self.PE, self.C + self.I + self.G + self.NX)
+        
+        # Substitute the expression for C from PrivateCons_open into EqGoods_open_sub
+        EqGoods_open_subsub = EqGoods_open_sub.subs(self.C, self.a + self.b * (self.Y - self.T))
+        
+        # Substitute I from Investment into EqGoods_open_subsub
+        EqGoods_open_final = EqGoods_open_subsub.subs(self.I, self.c - self.d * self.r)
+        
+        # Substitute NX from Netexport into EqGoods_open_final
+        EqGoods_open_final = EqGoods_open_final.subs(self.NX, self.f - self.g * self.epsilon)
+        
+        return EqGoods_open_final
+
+    def derive_LM_open(self):
+        # Substitute EqMoney into dMoney
+        dMoney_substituted = self.dMoney.subs(self.L, self.M / self.P)
+        
+        return dMoney_substituted
+
+    def solve_for_Y_open(self):
+        IS_eq_open = self.derive_IS_open()
+        LM_eq_open = self.derive_LM_open()
+        IS_solution_Y_open = sp.solve(IS_eq_open, self.Y)
+        LM_solution_Y_open = sp.solve(LM_eq_open, self.Y)
+        return IS_solution_Y_open, LM_solution_Y_open
+
+    def solve_for_r_open(self):
+        IS_eq_open = self.derive_IS_open()
+        LM_eq_open = self.derive_LM_open()
+        IS_solution_r_open = sp.solve(IS_eq_open, self.r)
+        LM_solution_r_open = sp.solve(LM_eq_open, self.r)
+        return IS_solution_r_open, LM_solution_r_open
+
+    def find_equilibrium_open(self):
+        IS_eq_open = self.derive_IS_open()
+        LM_eq_open = self.derive_LM_open()
+        
+        # Solve the IS and LM equations together for Y and r
+        equilibrium_open = sp.solve([IS_eq_open, LM_eq_open], (self.Y, self.r), dict=True)
+        
+        return equilibrium_open
+
+    def objective_open(self, params):
+        self.T = params[0]
+        
+        equilibrium_open = self.find_equilibrium_open()
+        if equilibrium_open:
+            for sol in equilibrium_open:
+                if self.r in sol:
+                    return (sol[self.r] - 0.04)**2
+        return float('inf')
+
+    def optimize_parameters_open(self):
+        initial_guess = [self.T]
+        result = minimize(self.objective_open, initial_guess, method='Nelder-Mead')
+        self.T = result.x[0]
+        return result.x
+
+    def store_curves_open(self, x_range=(0.5, 2.5), num_points=100):
+        self.Y_values = np.linspace(x_range[0], x_range[1], num_points)
+        IS_r_values_open = [
+            sp.solve(self.derive_IS_open().subs(self.Y, Y_val), self.r)[0].evalf()
+            for Y_val in self.Y_values
+        ]
+        LM_r_values_open = [
+            sp.solve(self.derive_LM_open().subs(self.Y, Y_val), self.r)[0].evalf()
+            for Y_val in self.Y_values
+        ]
+        return IS_r_values_open, LM_r_values_open
+        
