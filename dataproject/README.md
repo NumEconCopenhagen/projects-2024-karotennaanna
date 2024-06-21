@@ -13,3 +13,5 @@ numpy: For numerical computing
 matplotlib: For creating static, interactive, and animated visualizations
 ipywidgets: For creating interactive widgets in Jupyter notebooks
 IPython: For enhanced interactive Python, including widgets and other display functionalities
+
+The project is written and solved by Anna Stenild (Bcd934), Karoline Marie Meulengracht (Bhj883) and Tenna Merrald (Khc600)
