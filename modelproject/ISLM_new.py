@@ -454,3 +454,59 @@ class ISLM_alg:
         ]
         return IS_r_values_open, LM_r_values_open
 
+# Assuming values for the parameters a, b, c, d, f, g, epsilon, e, M, P, L, T, Y, r, PE, C, I, G, NX
+a, b, c, d, f, g, epsilon, e, M, P, T, G = 1, 0.8, 0.5, 0.1, 0.2, 0.3, 0.4, 0.6, 100, 1, 10, 20
+
+L, Y, r, PE, C, I, NX = sp.symbols('L Y r PE C I NX')
+
+# Create the ISLM_alg instance
+model = ISLM_alg(a, b, c, d, e, f, T, G, M, P)
+
+# Initialize additional parameters
+model.initialize_parameters(a, b, c, d, f, g, epsilon, e, M, P, L, T, Y, r, PE, C, I, G, NX)
+
+# Derive and display the IS and LM equations for the open economy
+IS_eq_open = model.derive_IS_open()
+LM_eq_open = model.derive_LM_open()
+
+# Solve for Y from IS and LM equations
+IS_solution_Y_open = sp.solve(IS_eq_open, model.Y)
+LM_solution_Y_open = sp.solve(LM_eq_open, model.Y)
+
+# Solve for r from IS and LM equations
+IS_solution_r_open = sp.solve(IS_eq_open, model.r)
+LM_solution_r_open = sp.solve(LM_eq_open, model.r)
+
+# Display the IS curve solutions for Y
+print("IS Curve Solution (Y):")
+if IS_solution_Y_open:
+    for sol in IS_solution_Y_open:
+        display(sp.Eq(model.Y, sol))
+
+# Display the IS curve solutions for r
+print("IS Curve Solution (r):")
+if IS_solution_r_open:
+    for sol in IS_solution_r_open:
+        display(sp.Eq(model.r, sol))
+
+# Display the LM curve solutions for Y
+print("LM Curve Solution (Y):")
+if LM_solution_Y_open:
+    for sol in LM_solution_Y_open:
+        display(sp.Eq(model.Y, sol))
+
+# Display the LM curve solutions for r
+print("LM Curve Solution (r):")
+if LM_solution_r_open:
+    for sol in LM_solution_r_open:
+        display(sp.Eq(model.r, sol))
+
+# Find equilibrium (Y, r) in terms of the parameters
+equilibrium_open = model.find_equilibrium_open()
+print("Equilibrium Solutions:")
+if equilibrium_open:
+    for sol in equilibrium_open:
+        if model.Y in sol:
+            display(sp.Eq(model.Y, sol[model.Y]))
+        if model.r in sol:
+            display(sp.Eq(model.r, sol[model.r]))
