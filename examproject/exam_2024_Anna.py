@@ -1,17 +1,8 @@
 import numpy as np
+from types import SimpleNamespace
 
-class ProductionEconomyModel:
-    def __init__(self, A=1.0, gamma=0.5, alpha=0.3, nu=1.0, epsilon=2.0, tau=0.0, T=0.0):
-        """
-        Initializes the Production Economy Model with given parameters.
-        :param A: Productivity parameter for firms.
-        :param gamma: Elasticity parameter for production function.
-        :param alpha: Consumer preference parameter for good 1.
-        :param nu: Disutility of labor parameter.
-        :param epsilon: Labor supply elasticity parameter.
-        :param tau: Tax on good 2.
-        :param T: Lump-sum transfer.
-        """
+class EconomicModel:
+    def __init__(self, A, gamma, alpha, nu, epsilon, tau=0.0, T=0.0):
         self.A = A
         self.gamma = gamma
         self.alpha = alpha
@@ -20,64 +11,23 @@ class ProductionEconomyModel:
         self.tau = tau
         self.T = T
 
-    def labor_supply(self, w, p1, p2):
-        """
-        Computes optimal labor supply given wages and prices.
-        :param w: Wage rate.
-        :param p1: Price of good 1.
-        :param p2: Price of good 2.
-        :return: Optimal labor supply.
-        """
-        term = w * (p1**self.alpha) * ((p2 + self.tau)**(1 - self.alpha))
-        labor = (term / self.nu)**(1 / (self.epsilon + 1))
-        return labor
+    def firm_behavior(self, w, p):
+        l_star = (p * self.A * self.gamma / w)**(1/(1 - self.gamma))
+        y_star = self.A * (l_star**self.gamma)
+        pi_star = w * l_star * (1 - self.gamma) / self.gamma
+        return l_star, y_star, pi_star
 
-    def production(self, w, p1, p2):
-        """
-        Computes optimal production level for each firm given wages and prices.
-        :param w: Wage rate.
-        :param p1: Price of good 1.
-        :param p2: Price of good 2.
-        :return: Tuple of optimal production levels for each good.
-        """
-        labor = self.labor_supply(w, p1, p2)
-        production1 = self.A * (labor**self.gamma)
-        production2 = self.A * (labor**self.gamma)
-        return production1, production2
+    def consumer_behavior(self, p1, p2, w, T, pi1, pi2):
+        c1_star = self.alpha * (w + T + pi1 + pi2) / p1
+        c2_star = (1 - self.alpha) * (w + T + pi1 + pi2) / (p2 + self.tau)
+        l_star = ((w + T + pi1 + pi2) * self.nu / (p1*c1_star + (p2 + self.tau)*c2_star))**(1/(1 + self.epsilon))
+        return c1_star, c2_star, l_star
 
-    def consumer_utility(self, w, p1, p2):
-        """
-        Computes the utility of the consumer.
-        :param w: Wage rate.
-        :param p1: Price of good 1.
-        :param p2: Price of good 2.
-        :return: Consumer utility.
-        """
-        labor = self.labor_supply(w, p1, p2)
-        income = w * labor + self.T
-        consumption1 = self.alpha * income / p1
-        consumption2 = (1 - self.alpha) * income / (p2 + self.tau)
-        utility = np.log(consumption1**self.alpha * consumption2**(1 - self.alpha)) - self.nu * labor**(1 + self.epsilon) / (1 + self.epsilon)
-        return utility
-
-    def check_market_clearing(self, w, p1, p2):
-        """
-        Checks the market clearing conditions for labor and goods.
-        :param w: Wage rate.
-        :param p1: Price of good 1.
-        :param p2: Price of good 2.
-        :return: Dictionary indicating if labor and goods markets clear.
-        """
-        labor = self.labor_supply(w, p1, p2)
-        production1, production2 = self.production(w, p1, p2)
-        consumer_labor = labor
-        consumer_goods1 = self.alpha * (w * labor + self.T) / p1
-        consumer_goods2 = (1 - self.alpha) * (w * labor + self.T) / (p2 + self.tau)
-        
-        return {
-            'Labor Market': np.isclose(labor, consumer_labor),
-            'Good Market 1': np.isclose(production1, consumer_goods1),
-            'Good Market 2': np.isclose(production2, consumer_goods2)
-        }
-
-
+    def market_clearing(self, w, p1, p2):
+        l1, y1, pi1 = self.firm_behavior(w, p1)
+        l2, y2, pi2 = self.firm_behavior(w, p2)
+        c1, c2, l_star = self.consumer_behavior(p1, p2, w, self.T, pi1, pi2)
+        labor_clearing = (l1 + l2) - l_star
+        goods_clearing1 = y1 - c1
+        goods_clearing2 = y2 - c2
+        return labor_clearing, goods_clearing1, goods_clearing2
