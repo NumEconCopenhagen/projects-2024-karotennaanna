@@ -1,5 +1,6 @@
 import numpy as np
 from types import SimpleNamespace
+import pandas as pd
 
 class EconomicModel:
     def __init__(self, A, gamma, alpha, nu, epsilon, tau=0.0, T=0.0):
@@ -30,4 +31,20 @@ class EconomicModel:
         labor_clearing = (l1 + l2) - l_star
         goods_clearing1 = y1 - c1
         goods_clearing2 = y2 - c2
-        return labor_clearing, goods_clearing1, goods_clearing2
+        return labor_clearing, goods_clearing1, goods_clearing2, y1, y2, c1, c2
+
+    def equilibrium_conditions(self, p1, p2):
+        labor_clearing, goods_clearing1, goods_clearing2, y1, y2, c1, c2 = self.market_clearing(1, p1, p2)
+        return [labor_clearing, goods_clearing1, goods_clearing2, y1, y2, c1, c2]
+
+# Initialize parameters
+par = SimpleNamespace()
+par.A = 1.0
+par.gamma = 0.5
+par.alpha = 0.3
+par.nu = 1.0
+par.epsilon = 2.0
+par.tau = 0.0
+par.T = 0.0
+
+model = EconomicModel(par.A, par.gamma, par.alpha, par.nu, par.epsilon, par.tau, par.T)
