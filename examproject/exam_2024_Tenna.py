@@ -126,3 +126,60 @@ if __name__ == "__main__":
     # Find the optimal tau and T
     optimal_tau, optimal_T = model.maximize_social_welfare()
     print(f"Optimal tau: {optimal_tau}, Optimal T: {optimal_T}")
+
+
+import numpy as np
+
+class ProductionEconomyModel2:
+    def __init__(self, alpha, gamma, epsilon, nu, A, p1, p2, w, tau, T):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.nu = nu
+        self.A = A
+        self.p1 = p1
+        self.p2 = p2
+        self.w = w
+        self.tau = tau
+        self.T = T
+
+    def optimal_behavior(self, l):
+        c1 = self.c1(l)
+        c2 = self.c2(l)
+        utility = np.log(c1**self.alpha * c2**(1 - self.alpha)) - self.nu * (l**(1 + self.epsilon)) / (1 + self.epsilon)
+        return utility
+
+    def c1(self, l):
+        return self.alpha * (self.w * l + self.T + self.pi1() + self.pi2()) / self.p1
+
+    def c2(self, l):
+        return (1 - self.alpha) * (self.w * l + self.T + self.pi1() + self.pi2()) / (self.p2 + self.tau)
+
+    def pi1(self):
+        return (1 - self.gamma) / self.gamma * self.w * ((self.p1 * self.A * self.gamma / self.w)**(1 / (1 - self.gamma)))
+
+    def pi2(self):
+        return (1 - self.gamma) / self.gamma * self.w * ((self.p2 * self.A * self.gamma / self.w)**(1 / (1 - self.gamma)))
+
+    def labor_market(self):
+        l1_star = (self.p1 * self.A * self.gamma / self.w)**(1 / (1 - self.gamma))
+        l2_star = (self.p2 * self.A * self.gamma / self.w)**(1 / (1 - self.gamma))
+        return l1_star + l2_star
+
+    def good_market_1(self):
+        return self.c1_star() - self.y1_star()
+
+    def good_market_2(self):
+        return self.c2_star() - self.y2_star()
+
+    def y1_star(self):
+        return self.A * (self.labor_market() / 2)**self.gamma
+
+    def y2_star(self):
+        return self.A * (self.labor_market() / 2)**self.gamma
+
+    def c1_star(self):
+        return self.c1(self.labor_market())
+
+    def c2_star(self):
+        return self.c2(self.labor_market())
