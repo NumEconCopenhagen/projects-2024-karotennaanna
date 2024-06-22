@@ -72,13 +72,3 @@ class EconomicModel:
         else:
             raise ValueError("Equilibrium prices could not be found")
 
-# Example usage:
-alpha = 0.5
-nu = 0.1
-epsilon = 1.5
-A = 1.0
-gamma = 0.3
-
-model = EconomicModel(alpha, nu, epsilon, A, gamma)
-p1, p2 = model.solve_equilibrium()
-print(f"p1={p1:.3f} and p2={p2:.3f}")
