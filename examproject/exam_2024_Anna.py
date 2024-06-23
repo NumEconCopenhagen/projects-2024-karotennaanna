@@ -67,4 +67,3 @@ class ProductionEconomy:
         
         return [labor_market, good_market_1]
 
-model = ProductionEconomy()
