@@ -4,6 +4,12 @@ from types import SimpleNamespace
 
 class ProductionEconomy:
     def __init__(self, par=None):
+        """
+        Initializes the ProductionEconomy class with default parameters.
+        
+        Parameters:
+        par (SimpleNamespace, optional): Namespace to store parameters. Defaults to None.
+        """
         self.par = par = SimpleNamespace()
         
         # Firms parameters
@@ -26,26 +32,65 @@ class ProductionEconomy:
         self.p1 = None
         self.p2 = None
 
-    # Calculate household utility given labor and prices
     def utility_(self, l, p1, p2):
+        """
+        Calculate household utility given labor and prices.
+
+        Parameters:
+        l (float): Labor supplied by the household.
+        p1 (float): Price of good 1.
+        p2 (float): Price of good 2.
+
+        Returns:
+        float: Utility value.
+        """
         c1 = self.c1(l, p1, p2)
         c2 = self.c2(l, p1, p2)
         return np.log(c1**self.par.alpha * c2**(1 - self.par.alpha)) - self.par.nu * (l**(1 + self.par.epsilon)) / (1 + self.par.epsilon)
 
-    # Calculate consumption of good 1
     def c1(self, l, p1, p2):
+        """
+        Calculate consumption of good 1.
+
+        Parameters:
+        l (float): Labor supplied by the household.
+        p1 (float): Price of good 1.
+        p2 (float): Price of good 2.
+
+        Returns:
+        float: Consumption of good 1.
+        """
         profit1 = self.firm_profit1(p1)
         profit2 = self.firm_profit2(p2)
         return self.par.alpha * (self.w * l + self.par.T + profit1 + profit2) / p1
 
-    # Calculate consumption of good 2
     def c2(self, l, p1, p2):
+        """
+        Calculate consumption of good 2.
+
+        Parameters:
+        l (float): Labor supplied by the household.
+        p1 (float): Price of good 1.
+        p2 (float): Price of good 2.
+
+        Returns:
+        float: Consumption of good 2.
+        """
         profit1 = self.firm_profit1(p1)
         profit2 = self.firm_profit2(p2)
         return (1 - self.par.alpha) * (self.w * l + self.par.T + profit1 + profit2) / (p2 + self.par.tau)
 
-    # Optimize labor to maximize utility for workers
     def optimize_l(self, p1, p2):
+        """
+        Optimize labor to maximize utility for workers.
+
+        Parameters:
+        p1 (float): Price of good 1.
+        p2 (float): Price of good 2.
+
+        Returns:
+        tuple: Optimal labor, consumption of good 1, and consumption of good 2.
+        """
         obj = lambda l: -self.utility_(l, p1, p2)
         res = optimize.minimize_scalar(obj, bounds=(0, 1), method='bounded')
         l_star = res.x
@@ -53,26 +98,59 @@ class ProductionEconomy:
         c2_star = self.c2(l_star, p1, p2)
         return l_star, c1_star, c2_star
 
-    # Calculate firms' labor demand given prices
     def firm_labor_demand(self, p1, p2):
+        """
+        Calculate firms' labor demand given prices.
+
+        Parameters:
+        p1 (float): Price of good 1.
+        p2 (float): Price of good 2.
+
+        Returns:
+        tuple: Labor demand for firms producing goods 1 and 2.
+        """
         l1_star = (p1 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
         l2_star = (p2 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
         return l1_star, l2_star
 
-    # Calculate profit for firm 1 given price
     def firm_profit1(self, p1):
+        """
+        Calculate profit for firm 1 given price.
+
+        Parameters:
+        p1 (float): Price of good 1.
+
+        Returns:
+        float: Profit for firm 1.
+        """
         l1_star = (p1 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
         y1_star = self.par.A * (l1_star)**self.par.gamma
         return (1 - self.par.gamma) * y1_star * p1
 
-    # Calculate profit for firm 2 given price
     def firm_profit2(self, p2):
+        """
+        Calculate profit for firm 2 given price.
+
+        Parameters:
+        p2 (float): Price of good 2.
+
+        Returns:
+        float: Profit for firm 2.
+        """
         l2_star = (p2 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
         y2_star = self.par.A * (l2_star)**self.par.gamma
         return (1 - self.par.gamma) * y2_star * p2
 
-    # Check market clearing conditions for labor and good 1
     def market_clearing_conditions(self, p):
+        """
+        Check market clearing conditions for labor and good 1.
+
+        Parameters:
+        p (list): List containing prices [p1, p2].
+
+        Returns:
+        list: Discrepancies in labor and good 1 markets.
+        """
         p1, p2 = p
         l1_star, l2_star = self.firm_labor_demand(p1, p2)
         l_star, c1_star, c2_star = self.optimize_l(p1, p2)
@@ -83,7 +161,9 @@ class ProductionEconomy:
         return [labor_market, good_market_1]
     
     def solve_market_clearing(self):
-        """ Solve for equilibrium prices p1 and p2 """
+        """
+        Solve for equilibrium prices p1 and p2.
+        """
         def objective(p):
             return np.sum(np.square(self.market_clearing_conditions(p)))
 
@@ -94,6 +174,15 @@ class ProductionEconomy:
             raise ValueError("Market clearing optimization failed")
 
     def social_welfare(self, tau):
+        """
+        Calculate social welfare given a tax rate.
+
+        Parameters:
+        tau (float): Tax rate.
+
+        Returns:
+        float: Negative of the social welfare function.
+        """
         self.par.tau = tau
         self.solve_market_clearing()  # Ensure we have equilibrium prices
 
@@ -104,10 +193,20 @@ class ProductionEconomy:
         return -SWF
 
     def optimize_tau(self):
+        """
+        Optimize the tax rate to maximize social welfare.
+
+        Returns:
+        tuple: Optimal tax rate and maximum social welfare.
+        """
         result = optimize.minimize_scalar(lambda tau: -self.social_welfare(tau), bounds=(0, 2), method='bounded')
         optimal_tau = result.x
         max_swf = -result.fun
         self.par.tau = optimal_tau
         self.solve_market_clearing()  # Ensure prices are set for optimal tau
         return optimal_tau, max_swf
+
+
+
+
     
