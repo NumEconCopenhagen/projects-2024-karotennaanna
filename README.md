@@ -1,4 +1,4 @@
-# \[Group name\]
+# \[karotennaanna]
 
 **Group members:**
 - Karoline Meulengracht
