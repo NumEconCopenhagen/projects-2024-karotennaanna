@@ -205,8 +205,3 @@ class ProductionEconomy:
         self.par.tau = optimal_tau
         self.solve_market_clearing()  # Ensure prices are set for optimal tau
         return optimal_tau, max_swf
-
-
-
-
-    
