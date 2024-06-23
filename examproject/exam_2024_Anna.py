@@ -1,74 +1,70 @@
 import numpy as np
-from scipy.optimize import minimize
+from scipy import optimize
+from types import SimpleNamespace
 
-class EconomicModel:
-    def __init__(self, alpha, nu, epsilon, A, gamma):
-        self.alpha = alpha
-        self.nu = nu
-        self.epsilon = epsilon
-        self.A = A
-        self.gamma = gamma
-    
-    def optimal_labor(self, p1, p2, w, tau, T):
-        # Calculate optimal labor
-        return ((p1 * self.A * self.gamma) / w) ** (1 / self.gamma), ((p2 * self.A * self.gamma) / w) ** (1 / self.gamma)
+class ProductionEconomy:
+    def __init__(self, par=None):
+        self.par = par = SimpleNamespace()
+        par.A = 1.0
+        par.gamma = 0.5
+        par.alpha = 0.3
+        par.nu = 1.0
+        par.epsilon = 2.0
+        par.tau = 0.0
+        par.T = 0.0
+        par.kappa = 0.1
 
-    def optimal_profits(self, p, w):
-        # Calculate optimal profits
-        return (1 - self.gamma) / self.gamma * w * (p * self.A * self.gamma / w) ** (1 - self.gamma)
+        self.w = 1  # Assuming wage is 1 as numeraire
+        self.p1 = None
+        self.p2 = None
 
-    def consumption(self, w, T, p1, p2, tau):
-        # Calculate consumption
-        labor1, labor2 = self.optimal_labor(p1, p2, w, tau, T)
-        profits1 = self.optimal_profits(p1, w)
-        profits2 = self.optimal_profits(p2, w)
-        c1 = self.alpha * (w * (labor1 + labor2) + T + profits1 + profits2) / p1
-        c2 = (1 - self.alpha) * (w * (labor1 + labor2) + T + profits1 + profits2) / (p2 + tau)
-        return c1, c2
-    
-    def utility(self, c1, c2, l):
-        # Calculate utility
-        return self.alpha * np.log(c1) + (1 - self.alpha) * np.log(c2) - self.nu * l ** (1 + self.epsilon) / (1 + self.epsilon)
-    
-    def labor_demand(self, p1, p2):
-        # Dummy labor demand calculation
-        return 1.0  # Placeholder, you should replace this with your actual labor demand function
+    def utility_(self, l, p1, p2):
+        c1 = self.c1(l, p1, p2)
+        c2 = self.c2(l, p1, p2)
+        return np.log(c1**self.par.alpha * c2**(1 - self.par.alpha)) - self.par.nu * (l**(1 + self.par.epsilon)) / (1 + self.par.epsilon)
 
-    def production(self, labor_demand):
-        # Dummy production function
-        return labor_demand  # Placeholder, you should replace this with your actual production function
+    def c1(self, l, p1, p2):
+        profit1 = self.firm_profit1(p1)
+        profit2 = self.firm_profit2(p2)
+        return self.par.alpha * (self.w * l + self.par.T + profit1 + profit2) / p1
 
-    def check_market_clearing(self, p1, p2):
-        """Check market clearing conditions for labor and goods markets."""
-        labor_demand = self.labor_demand(p1, p2)
-        production1 = self.production(labor_demand)
-        production2 = self.production(labor_demand)
-        consumption1, consumption2 = self.consumption(1.0, 0.5, p1, p2, 0.1)  # Placeholder values for w, T, tau
+    def c2(self, l, p1, p2):
+        profit1 = self.firm_profit1(p1)
+        profit2 = self.firm_profit2(p2)
+        return (1 - self.par.alpha) * (self.w * l + self.par.T + profit1 + profit2) / (p2 + self.par.tau)
+
+    def optimize_l(self, p1, p2):
+        """ Maximize utility for workers """
+        obj = lambda l: -self.utility_(l, p1, p2)
+        res = optimize.minimize_scalar(obj, bounds=(0, 1), method='bounded')
+        l_star = res.x
+        c1_star = self.c1(l_star, p1, p2)
+        c2_star = self.c2(l_star, p1, p2)
+        return l_star, c1_star, c2_star
+
+    def firm_labor_demand(self, p1, p2):
+        l1_star = (p1 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
+        l2_star = (p2 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
+        return l1_star, l2_star
+
+    def firm_profit1(self, p1):
+        l1_star = (p1 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
+        y1_star = self.par.A * (l1_star)**self.par.gamma
+        return (1 - self.par.gamma) * y1_star * p1
+
+    def firm_profit2(self, p2):
+        l2_star = (p2 * self.par.A * self.par.gamma / self.w)**(1 / (1 - self.par.gamma))
+        y2_star = self.par.A * (l2_star)**self.par.gamma
+        return (1 - self.par.gamma) * y2_star * p2
+
+    def market_clearing_conditions(self, p):
+        p1, p2 = p
+        l1_star, l2_star = self.firm_labor_demand(p1, p2)
+        l_star, c1_star, c2_star = self.optimize_l(p1, p2)
+        labor_market = l1_star + l2_star - l_star
+
+        good_market_1 = c1_star - self.par.A * (l1_star)**self.par.gamma
         
-        return {
-            'Labor Market': np.isclose(labor_demand, labor_demand),
-            'Good Market 1': np.isclose(production1, consumption1),
-            'Good Market 2': np.isclose(production2, consumption2)
-        }
+        return [labor_market, good_market_1]
 
-    def solve_equilibrium(self):
-        """
-        Solve for the equilibrium prices p1 and p2 that clear the markets.
-        """
-
-        def market_excess_demand(prices):
-            p1, p2 = prices
-            labor_demand = self.labor_demand(p1, p2)
-            production1 = self.production(labor_demand)
-            production2 = self.production(labor_demand)
-            consumption1, consumption2 = self.consumption(1.0, 0.5, p1, p2, 0.1)  # Placeholder values for w, T, tau
-            excess_demand1 = production1 - consumption1
-            excess_demand2 = production2 - consumption2
-            return excess_demand1**2 + excess_demand2**2
-
-        result = minimize(market_excess_demand, [1.0, 1.0], bounds=[(0.1, 2.0), (0.1, 2.0)])
-        if result.success:
-            return result.x
-        else:
-            raise ValueError("Equilibrium prices could not be found")
-
+model = ProductionEconomy()
