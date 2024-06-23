@@ -11,7 +11,6 @@ class ProductionEconomy:
         par.nu = 1.0
         par.epsilon = 2.0
         par.tau = 0.0
-        par.T = 0.0
         par.kappa = 0.1
 
         self.w = 1  # Assuming wage is 1 as numeraire
