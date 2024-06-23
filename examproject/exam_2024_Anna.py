@@ -82,29 +82,4 @@ class ProductionEconomy:
         
         return [labor_market, good_market_1]
 
-# Instantiate the ProductionEconomy class
-economy = ProductionEconomy()
-
-# Initial guess for prices
-initial_guess = [1, 1]
-
-# Find equilibrium prices
-equilibrium_prices = optimize.root(economy.market_clearing_conditions, initial_guess).x
-p1_star, p2_star = equilibrium_prices
-
-# Get equilibrium labor and consumption
-l_star, c1_star, c2_star = economy.optimize_l(p1_star, p2_star)
-
-# Output results
-equilibrium_results = {
-    "Equilibrium Price p1 (p1_star)": p1_star,
-    "Equilibrium Price p2 (p2_star)": p2_star,
-    "Equilibrium Labor (l_star)": l_star,
-    "Equilibrium Consumption c1 (c1_star)": c1_star,
-    "Equilibrium Consumption c2 (c2_star)": c2_star
-}
-
-# Print the results in a formatted way
-for key, value in equilibrium_results.items():
-    print(f"{key}: {value:.4f}")
 
