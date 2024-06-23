@@ -34,4 +34,7 @@ Dependencies: Apart from a standard Anaconda Python 3 installation, the project 
 The project is written and solved by Anna Stenild (Bcd934), Karoline Marie Meulengracht (Bhj883) and Tenna Merrald (Khc600)
 
 
+We have used ChatGPT to assist with code.
+
+
 
