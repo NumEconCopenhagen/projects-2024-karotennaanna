@@ -79,7 +79,8 @@ class ProductionEconomy:
         labor_market = l1_star + l2_star - l_star
 
         good_market_1 = c1_star - self.par.A * (l1_star)**self.par.gamma
-        
-        return [labor_market, good_market_1]
+        good_market_2 = c2_star - self.par.A * (l2_star)**self.par.gamma
 
-
+        return [labor_market, good_market_1, good_market_2]
+    
+   
