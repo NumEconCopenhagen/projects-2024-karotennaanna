@@ -1,8 +1,8 @@
-# Model analysis project
+# Exam analysis project
 
-Our project is titled *Model Project* and derives a simple closed economy IS-LM model. Then it analyzes fiscal and monetary shocks and lastly it analyzes the eeffects of opening up the economy.
+Our project is titled *Exam Project* and answers the problem 1, 2 and 3 given in the Exam 2024. Problem 1 is analysing a production econoomy and CO2 taxtion. Problem 2 is analysing a Career choice model and lastly problem 3 is analysing Barycentric interpolation. 
 
-The results of the project can be seen from running [modelproject_new.ipynb](modelproject_new.ipynb).
+The results of the project can be seen from running [examproject.ipynb](examproject.ipynb).
 
 **Dependencies:** Apart from a standard Anaconda Python 3 installation, the project requires no further packages.
 
